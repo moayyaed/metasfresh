@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.metas.JsonObjectMapperHolder;
 import de.metas.audit.data.repository.DataExportAuditLogRepository;
 import de.metas.audit.data.repository.DataExportAuditRepository;
+import de.metas.bpartner.BPGroupRepository;
 import de.metas.bpartner.composite.repository.BPartnerCompositeRepository;
 import de.metas.bpartner.service.BPartnerCreditLimitRepository;
 import de.metas.bpartner.service.impl.BPartnerBL;
@@ -96,7 +97,7 @@ public class ExportExternalReferenceToRabbitMQServiceTest
 		exportExternalReferenceToRabbitMQService = new ExportExternalReferenceToRabbitMQService(
 				new DataExportAuditRepository(),
 				new DataExportAuditLogRepository(),
-				new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository()),
+				new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository(), new BPGroupRepository()),
 				new ExternalSystemMessageSender(new RabbitTemplate(), new Queue(QUEUE_NAME_MF_TO_ES)),
 				externalReferenceRepository,
 				new UserGroupRepository(),

@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import de.metas.camel.externalsystems.common.IdAwareRouteBuilder;
 import de.metas.camel.externalsystems.common.PInstanceUtil;
 import de.metas.camel.externalsystems.common.ProcessLogger;
+import de.metas.camel.externalsystems.common.importsettings.BPartnerImportSettingsHolder;
 import de.metas.camel.externalsystems.common.v2.BPUpsertCamelRequest;
 import de.metas.camel.externalsystems.sap.config.BPartnerFileEndpointConfig;
 import de.metas.camel.externalsystems.sap.model.bpartner.BPartnerRow;
@@ -66,6 +67,9 @@ public class GetBPartnersFromFileRouteBuilder extends IdAwareRouteBuilder
 	@NonNull
 	private final ProcessLogger processLogger;
 
+	@NonNull
+	private final BPartnerImportSettingsHolder bPartnerImportSettingsHolder;
+
 	@Builder
 	private GetBPartnersFromFileRouteBuilder(
 			@NonNull final BPartnerFileEndpointConfig fileEndpointConfig,
@@ -79,6 +83,7 @@ public class GetBPartnersFromFileRouteBuilder extends IdAwareRouteBuilder
 		this.routeId = routeId;
 		this.enabledByExternalSystemRequest = enabledByExternalSystemRequest;
 		this.processLogger = processLogger;
+		this.bPartnerImportSettingsHolder = BPartnerImportSettingsHolder.of(enabledByExternalSystemRequest.getParameters());
 	}
 
 	@Override
@@ -128,6 +133,7 @@ public class GetBPartnersFromFileRouteBuilder extends IdAwareRouteBuilder
 		final UpsertBPartnerRouteContext getBPartnerRouteContext = UpsertBPartnerRouteContext.builder()
 				.orgCode(enabledByExternalSystemRequest.getOrgCode())
 				.externalSystemConfigId(enabledByExternalSystemRequest.getExternalSystemConfigId())
+				.bPartnerImportSettings(bPartnerImportSettingsHolder.getBPartnerImportSettings())
 				.build();
 
 		exchange.setProperty(ROUTE_PROPERTY_UPSERT_BPARTNERS_ROUTE_CONTEXT, getBPartnerRouteContext);

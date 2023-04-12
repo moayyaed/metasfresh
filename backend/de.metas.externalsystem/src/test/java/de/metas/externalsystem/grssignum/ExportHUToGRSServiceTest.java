@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.metas.JsonObjectMapperHolder;
 import de.metas.audit.data.repository.DataExportAuditLogRepository;
 import de.metas.audit.data.repository.DataExportAuditRepository;
+import de.metas.bpartner.BPGroupRepository;
 import de.metas.common.externalsystem.JsonExternalSystemRequest;
 import de.metas.externalsystem.ExternalSystemConfigRepo;
 import de.metas.externalsystem.ExternalSystemConfigService;
@@ -75,7 +76,7 @@ public class ExportHUToGRSServiceTest
 
 		exportHUToGRSService = new ExportHUToGRSService(new DataExportAuditRepository(),
 														new DataExportAuditLogRepository(),
-														new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository()),
+														new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository(), new BPGroupRepository()),
 														new ExternalSystemMessageSender(new RabbitTemplate(), new Queue(QUEUE_NAME_MF_TO_ES)),
 														externalSystemConfigServiceMock);
 		createPrerequisites();

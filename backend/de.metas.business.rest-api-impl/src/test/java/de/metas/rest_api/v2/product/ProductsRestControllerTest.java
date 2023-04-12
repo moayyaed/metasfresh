@@ -23,6 +23,7 @@
 package de.metas.rest_api.v2.product;
 
 import ch.qos.logback.classic.Level;
+import de.metas.bpartner.BPGroupRepository;
 import de.metas.bpartner.BPartnerId;
 import de.metas.common.product.v2.response.JsonGetProductsResponse;
 import de.metas.common.product.v2.response.JsonProduct;
@@ -111,7 +112,7 @@ public class ProductsRestControllerTest
 		final ProductsServicesFacade productsServicesFacade = new ProductsServicesFacade(sectionCodeRepository);
 		final ExternalServices externalServices = Mockito.mock(ExternalServices.class);
 
-		final ExternalSystemService externalSystemService = new ExternalSystemService(new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository()),
+		final ExternalSystemService externalSystemService = new ExternalSystemService(new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository(), new BPGroupRepository()),
 																					  new ExternalSystemExportAuditRepo(),
 																					  new RuntimeParametersRepository(),
 																					  externalServices,

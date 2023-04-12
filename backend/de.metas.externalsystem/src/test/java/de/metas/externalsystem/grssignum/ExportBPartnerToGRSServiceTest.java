@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.metas.JsonObjectMapperHolder;
 import de.metas.audit.data.repository.DataExportAuditLogRepository;
 import de.metas.audit.data.repository.DataExportAuditRepository;
+import de.metas.bpartner.BPGroupRepository;
 import de.metas.bpartner.BPartnerId;
 import de.metas.common.externalsystem.JsonExternalSystemRequest;
 import de.metas.externalsystem.ExternalSystemConfigRepo;
@@ -75,7 +76,7 @@ public class ExportBPartnerToGRSServiceTest
 
 		AdempiereTestHelper.get().init();
 
-		exportBPartnerToGRSService = new ExportBPartnerToGRSService(new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository()),
+		exportBPartnerToGRSService = new ExportBPartnerToGRSService(new ExternalSystemConfigRepo(new ExternalSystemOtherConfigRepository(), new BPGroupRepository()),
 																	new DataExportAuditRepository(),
 																	new DataExportAuditLogRepository(),
 																	new ExternalSystemMessageSender(new RabbitTemplate(), new Queue(QUEUE_NAME_MF_TO_ES)),

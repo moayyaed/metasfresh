@@ -23,6 +23,9 @@
 package de.metas.externalsystem;
 
 import com.google.common.collect.ImmutableList;
+import de.metas.bpartner.BPGroup;
+import de.metas.bpartner.BPGroupId;
+import de.metas.bpartner.BPGroupRepository;
 import de.metas.bpartner.BPartnerId;
 import de.metas.common.util.EmptyUtil;
 import de.metas.common.util.StringUtils;
@@ -43,6 +46,7 @@ import de.metas.externalsystem.model.I_ExternalSystem_Config_Shopware6;
 import de.metas.externalsystem.model.I_ExternalSystem_Config_Shopware6Mapping;
 import de.metas.externalsystem.model.I_ExternalSystem_Config_Shopware6_UOM;
 import de.metas.externalsystem.model.I_ExternalSystem_Config_WooCommerce;
+import de.metas.externalsystem.model.I_SAP_BPartnerImportSettings;
 import de.metas.externalsystem.other.ExternalSystemOtherConfig;
 import de.metas.externalsystem.other.ExternalSystemOtherConfigId;
 import de.metas.externalsystem.other.ExternalSystemOtherConfigRepository;
@@ -52,6 +56,7 @@ import de.metas.externalsystem.sap.ExternalSystemSAPConfig;
 import de.metas.externalsystem.sap.ExternalSystemSAPConfigId;
 import de.metas.externalsystem.sap.SAPConfigMapper;
 import de.metas.externalsystem.sap.export.SAPExportAcctConfig;
+import de.metas.externalsystem.sap.importsettings.SAPBPartnerImportSettings;
 import de.metas.externalsystem.sap.source.SAPContentSourceLocalFile;
 import de.metas.externalsystem.sap.source.SAPContentSourceSFTP;
 import de.metas.externalsystem.shopware6.ExternalSystemShopware6Config;
@@ -77,18 +82,26 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.InterfaceWrapperHelper;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Repository
 public class ExternalSystemConfigRepo
 {
 	private final IQueryBL queryBL = Services.get(IQueryBL.class);
 	private final ExternalSystemOtherConfigRepository externalSystemOtherConfigRepository;
+	private final BPGroupRepository bpGroupRepository;
 
-	public ExternalSystemConfigRepo(@NonNull final ExternalSystemOtherConfigRepository externalSystemOtherConfigRepository)
+	public ExternalSystemConfigRepo(
+			@NonNull final ExternalSystemOtherConfigRepository externalSystemOtherConfigRepository,
+			@NonNull final BPGroupRepository bpGroupRepository)
 	{
 		this.externalSystemOtherConfigRepository = externalSystemOtherConfigRepository;
+		this.bpGroupRepository = bpGroupRepository;
 	}
 
 	public boolean isAnyConfigActive(final @NonNull ExternalSystemType type)
@@ -871,6 +884,7 @@ public class ExternalSystemConfigRepo
 				.signedVersion(config.getSignedVersion())
 				.signedPermissions(config.getSignedPermissions())
 				.exportAcctConfigList(getSAPAcctConfigBySAPConfigId(sapConfigId))
+				.bPartnerImportSettings(getBPartnerImportSettingsBySAPConfigId(sapConfigId))
 				.build();
 	}
 
@@ -908,6 +922,29 @@ public class ExternalSystemConfigRepo
 						.docTypeId(DocTypeId.ofRepoId(exportConfigRecord.getC_DocType_ID()))
 						.processId(AdProcessId.ofRepoId(exportConfigRecord.getAD_Process_ID()))
 						.build())
+				.collect(ImmutableList.toImmutableList());
+	}
+
+	@NonNull
+	private ImmutableList<SAPBPartnerImportSettings> getBPartnerImportSettingsBySAPConfigId(@NonNull final ExternalSystemSAPConfigId configId)
+	{
+		return queryBL.createQueryBuilder(I_SAP_BPartnerImportSettings.class)
+				.addOnlyActiveRecordsFilter()
+				.addEqualsFilter(I_SAP_BPartnerImportSettings.COLUMN_ExternalSystem_Config_SAP_ID, configId.getRepoId())
+				.create()
+				.stream()
+				.map(bpartnerImportSettings -> SAPBPartnerImportSettings.builder()
+						.seqNo(bpartnerImportSettings.getSeqNo())
+						.partnerCodePattern(bpartnerImportSettings.getPartnerCodePattern())
+						.isSingleBPartner(bpartnerImportSettings.isSingleBPartner())
+						.bpGroupName(bpGroupRepository.getOptionalById(BPGroupId.ofRepoId(bpartnerImportSettings.getC_BP_Group_ID()))
+											 .map(BPGroup::getName)
+											 .orElse(null))
+						.build())
+				.collect(Collectors.toMap(SAPBPartnerImportSettings::getPartnerCodePattern, Function.identity(),
+										  BinaryOperator.minBy(Comparator.comparing(SAPBPartnerImportSettings::getSeqNo))))
+				.values()
+				.stream()
 				.collect(ImmutableList.toImmutableList());
 	}
 }

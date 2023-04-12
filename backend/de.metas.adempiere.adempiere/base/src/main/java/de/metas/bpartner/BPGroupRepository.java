@@ -45,7 +45,12 @@ public class BPGroupRepository
 {
 	public BPGroup getbyId(@NonNull final BPGroupId groupId)
 	{
-		return ofRecord(loadOutOfTrx(groupId, I_C_BP_Group.class)).get();
+		return getOptionalById(groupId).get();
+	}
+
+	public Optional<BPGroup> getOptionalById(@NonNull final BPGroupId groupId)
+	{
+		return ofRecord(loadOutOfTrx(groupId, I_C_BP_Group.class));
 	}
 
 	public Optional<BPGroup> getByNameAndOrgId(@NonNull final String name, @NonNull final OrgId orgId)

@@ -73,6 +73,7 @@ import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_LOCAL
 import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_LOCAL_FILE_ROOT_LOCATION;
 import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_PRODUCT_CATEGORY_MAPPINGS;
 import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_PRODUCT_TYPE_MAPPINGS;
+import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_SAP_BPARTNER_IMPORT_SETTINGS;
 import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_SFTP_APPROVED_BY;
 import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_SFTP_BPARTNER_FILE_NAME_PATTERN;
 import static de.metas.common.externalsystem.ExternalSystemConstants.PARAM_SFTP_BPARTNER_TARGET_DIRECTORY;
@@ -125,6 +126,8 @@ public class InvokeSAPService
 		parameters.putAll(extractContentSourceParameters(sapConfig, externalRequest));
 
 		parameters.putAll(getMappingParameters(sapConfig.getParentId()));
+
+		parameters.put(PARAM_SAP_BPARTNER_IMPORT_SETTINGS, ObjectMapperUtil.writeAsStringUnchecked(sapConfig.getBPartnerImportSettings()));
 
 		return parameters;
 	}
